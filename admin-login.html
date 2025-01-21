@@ -5,7 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Girişi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <style>
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
         #loadingOverlay {
             display: none;
             position: fixed;
@@ -18,43 +34,265 @@
             justify-content: center;
             align-items: center;
         }
+
+        @keyframes rotateEye {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        #togglePassword.animate svg {
+            animation: rotateEye 0.5s ease-in-out;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .login-container {
+            position: relative;
+            padding: 3px;
+            border-radius: 1rem;
+            background: linear-gradient(
+                90deg,
+                #000428,
+                #004e92,
+                #2c5364,
+                #203a43,
+                #0f2027,
+                #2c5364,
+                #004e92,
+                #000428
+            );
+            background-size: 400% 400%;
+            animation: borderGlow 12s ease infinite;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-inner {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 0.9rem;
+            height: 100%;
+            backdrop-filter: blur(5px);
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: inherit;
+            background-size: 400% 400%;
+            filter: blur(10px);
+            opacity: 0.7;
+            z-index: -1;
+            animation: borderGlow 12s ease infinite;
+            border-radius: 1rem;
+        }
+
+        /* Input hover ve focus efektleri */
+        .form-input {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-input:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .form-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1),
+                        0 0 0 3px rgba(0, 78, 146, 0.2);
+        }
+
+        /* Login button animations */
+        .login-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #004e92, #000428);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(1px);
+        }
+
+        .login-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                rgba(255, 255, 255, 0.2),
+                rgba(255, 255, 255, 0)
+            );
+            transform: rotate(45deg);
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .login-btn:hover::after {
+            opacity: 1;
+            transform: rotate(45deg) translateX(-50%);
+        }
+
+        /* Error message animation */
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .error-message {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        /* Page load animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100">
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-3"></div>
-            <p class="text-gray-600">Giriş yapılıyor...</p>
+<body>
+    <div id="particles-js"></div>
+    <div class="content-wrapper">
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-3"></div>
+                <p class="text-gray-600">Giriş yapılıyor...</p>
+            </div>
+        </div>
+
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="login-container w-full max-w-md fade-in">
+                <div class="login-inner">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Admin Girişi</h2>
+                    <form id="loginForm" class="space-y-6">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
+                            <input type="email" id="email" name="email" required
+                                class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                placeholder="ornek@email.com">
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
+                            <div class="relative">
+                                <input type="password" id="password" name="password" required
+                                    class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                    placeholder="••••••••">
+                                <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none transition-all duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" id="eyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" id="submitButton"
+                                class="login-btn w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white transition-all">
+                                <span>Giriş Yap</span>
+                            </button>
+                        </div>
+                    </form>
+                    <div id="error" class="error-message mt-4 text-red-600 text-sm text-center hidden"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Admin Girişi</h2>
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-                    <input type="email" id="email" name="email" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        placeholder="ornek@email.com">
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
-                    <input type="password" id="password" name="password" required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        placeholder="••••••••">
-                </div>
-                <div>
-                    <button type="submit" id="submitButton"
-                        class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
-                        <span>Giriş Yap</span>
-                    </button>
-                </div>
-            </form>
-            <div id="error" class="mt-4 text-red-600 text-sm text-center hidden"></div>
-        </div>
-    </div>
+    <script>
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle"
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false
+                },
+                "size": {
+                    "value": 3,
+                    "random": true
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ffffff",
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                }
+            },
+            "retina_detect": true
+        });
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -104,6 +342,32 @@
                 console.log('Oturum açık, yönlendiriliyor...');
                 localStorage.setItem('isAuthenticated', 'true');
                 window.location.href = 'admin-panel.html';
+            }
+        });
+
+        // Şifre görünürlük kontrolü
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // İkon animasyonu
+            togglePassword.classList.add('animate');
+            setTimeout(() => togglePassword.classList.remove('animate'), 500);
+
+            // İkon güncelleme
+            if (type === 'text') {
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                `;
+            } else {
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                `;
             }
         });
 
