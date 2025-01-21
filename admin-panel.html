@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold">Admin Paneli</h1>
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center">
+                        <i class="fas fa-home mr-2"></i>
+                        Siteye Git
+                    </a>
+                    <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        Çıkış Yap
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Projects Section -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold">Projeler</h2>
+                <button id="addProjectBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <i class="fas fa-plus mr-2"></i>Yeni Proje
+                </button>
+            </div>
+            <div id="projectsList" class="space-y-4">
+                <!-- Projects will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold mb-6">Site Ayarları</h2>
+            <form id="settingsForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Site Başlığı</label>
+                    <input type="text" id="siteTitle" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Hakkımda</label>
+                    <textarea id="aboutText" rows="4" class="w-full p-2 border rounded"></textarea>
+                </div>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Kaydet
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg w-full max-w-md">
+                <div class="flex justify-between items-center p-4 border-b">
+                    <h3 class="text-lg font-semibold" id="modalTitle">Yeni Proje</h3>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="projectForm" class="p-4 space-y-4">
+                    <input type="hidden" id="projectId">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Proje Adı*</label>
+                        <input type="text" id="projectName" required class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Açıklama*</label>
+                        <textarea id="projectDescription" required rows="3" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Teknolojiler</label>
+                        <input type="text" id="projectTechnologies" placeholder="örn: HTML, CSS, JavaScript" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Proje Linki</label>
+                        <input type="url" id="projectLink" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Görsel URL</label>
+                        <input type="url" id="projectImage" class="w-full p-2 border rounded">
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-4">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded">
+                            İptal
+                        </button>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase importları
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase yapılandırması
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYakmE6XSRc_Kq1MCjw3svugRZT55h2DU",
+            authDomain: "site-8969e.firebaseapp.com",
+            projectId: "site-8969e",
+            storageBucket: "site-8969e.firebasestorage.app",
+            messagingSenderId: "49684651933",
+            appId: "1:49684651933:web:f76b4d86f9f81eaef49974",
+            measurementId: "G-XX0E1XGTBV"
+        };
+
+        // Firebase'i başlat
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global değişkenler
+        let currentUser = null;
+        const projectModal = document.getElementById('projectModal');
+        const projectForm = document.getElementById('projectForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const addProjectBtn = document.getElementById('addProjectBtn');
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            // Kullanıcı kontrolü
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    window.location.href = 'admin-login.html';
+                } else {
+                    currentUser = user;
+                    loadProjects();
+                    loadSettings();
+                }
+            });
+
+            // Event listeners
+            logoutBtn.addEventListener('click', handleLogout);
+            addProjectBtn.addEventListener('click', () => openModal());
+            projectForm.addEventListener('submit', handleProjectSubmit);
+            window.closeModal = closeModal;
+            window.deleteProject = deleteProject;
+            window.editProject = editProject;
+        });
+
+        // Modal işlemleri
+        function openModal(project = null) {
+            projectForm.reset();
+            document.getElementById('projectId').value = project ? project.id : '';
+            document.getElementById('modalTitle').textContent = project ? 'Projeyi Düzenle' : 'Yeni Proje';
+            
+            if (project) {
+                document.getElementById('projectName').value = project.name || '';
+                document.getElementById('projectDescription').value = project.description || '';
+                document.getElementById('projectTechnologies').value = project.technologies || '';
+                document.getElementById('projectLink').value = project.link || '';
+                document.getElementById('projectImage').value = project.image || '';
+            }
+            
+            projectModal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            projectModal.classList.add('hidden');
+            projectForm.reset();
+        }
+
+        // Proje işlemleri
+        async function handleProjectSubmit(e) {
+            e.preventDefault();
+            const submitBtn = projectForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+
+            try {
+                const projectData = {
+                    name: document.getElementById('projectName').value.trim(),
+                    description: document.getElementById('projectDescription').value.trim(),
+                    technologies: document.getElementById('projectTechnologies').value.trim(),
+                    link: document.getElementById('projectLink').value.trim(),
+                    image: document.getElementById('projectImage').value.trim(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                const projectId = document.getElementById('projectId').value;
+
+                if (projectId) {
+                    await updateDoc(doc(db, "projects", projectId), projectData);
+                } else {
+                    projectData.createdAt = new Date().toISOString();
+                    await addDoc(collection(db, "projects"), projectData);
+                }
+
+                showAlert('Proje başarıyla kaydedildi', 'success');
+                closeModal();
+                loadProjects();
+            } catch (error) {
+                console.error('Proje kaydedilirken hata:', error);
+                showAlert('Proje kaydedilemedi', 'error');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function loadProjects() {
+            const projectsList = document.getElementById('projectsList');
+            projectsList.innerHTML = '<div class="text-center py-4">Yükleniyor...</div>';
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "projects"));
+                const projects = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                if (projects.length === 0) {
+                    projectsList.innerHTML = '<div class="text-center py-4 text-gray-500">Henüz proje eklenmemiş</div>';
+                    return;
+                }
+
+                projectsList.innerHTML = '';
+                projects.forEach(project => {
+                    projectsList.innerHTML += `
+                        <div class="border rounded p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between">
+                                <div>
+                                    <h3 class="font-semibold">${project.name}</h3>
+                                    <p class="text-gray-600 text-sm mt-1">${project.description}</p>
+                                    ${project.technologies ? `
+                                        <div class="flex gap-2 mt-2">
+                                            ${project.technologies.split(',').map(tech => 
+                                                `<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">${tech.trim()}</span>`
+                                            ).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="editProject('${project.id}')" class="text-blue-500 hover:text-blue-700">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteProject('${project.id}')" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error('Projeler yüklenirken hata:', error);
+                projectsList.innerHTML = '<div class="text-center py-4 text-red-500">Projeler yüklenemedi</div>';
+            }
+        }
+
+        async function editProject(id) {
+            try {
+                const docRef = doc(db, "projects", id);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    openModal({ id, ...docSnap.data() });
+                }
+            } catch (error) {
+                console.error('Proje yüklenirken hata:', error);
+                showAlert('Proje yüklenemedi', 'error');
+            }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('Bu projeyi silmek istediğinize emin misiniz?')) return;
+
+            try {
+                await deleteDoc(doc(db, "projects", id));
+                showAlert('Proje başarıyla silindi', 'success');
+                loadProjects();
+            } catch (error) {
+                console.error('Proje silinirken hata:', error);
+                showAlert('Proje silinemedi', 'error');
+            }
+        }
+
+        // Ayarlar işlemleri
+        async function loadSettings() {
+            try {
+                const settingsRef = doc(db, "settings", "general");
+                const settingsSnap = await getDoc(settingsRef);
+                const settings = settingsSnap.exists() ? settingsSnap.data() : {};
+                
+                document.getElementById('siteTitle').value = settings.siteTitle || '';
+                document.getElementById('aboutText').value = settings.aboutText || '';
+            } catch (error) {
+                console.error('Ayarlar yüklenirken hata:', error);
+                showAlert('Ayarlar yüklenemedi', 'error');
+            }
+        }
+
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+
+            try {
+                const settingsData = {
+                    siteTitle: document.getElementById('siteTitle').value.trim(),
+                    aboutText: document.getElementById('aboutText').value.trim(),
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: currentUser.email
+                };
+
+                await setDoc(doc(db, "settings", "general"), settingsData);
+                showAlert('Ayarlar kaydedildi', 'success');
+            } catch (error) {
+                console.error('Ayarlar kaydedilirken hata:', error);
+                showAlert('Ayarlar kaydedilemedi', 'error');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Çıkış işlemi
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                window.location.href = 'admin-login.html';
+            } catch (error) {
+                console.error('Çıkış yapılırken hata:', error);
+                showAlert('Çıkış yapılamadı', 'error');
+            }
+        }
+
+        // Bildirim gösterme
+        function showAlert(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `fixed bottom-4 right-4 px-6 py-3 rounded shadow-lg ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                'bg-blue-500'
+            } text-white`;
+            alert.textContent = message;
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 3000);
+        }
+    </script>
+    
+</body>
+</html>
