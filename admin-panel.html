@@ -6,98 +6,113 @@
     <title>Admin Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .transition-all { transition: all 0.3s ease; }
+        .hover-scale:hover { transform: scale(1.02); }
+        #loadingOverlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: white;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <!-- Header -->
-    <header class="bg-white shadow">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-xl font-bold">Admin Paneli</h1>
-                <div class="flex items-center space-x-4">
-                    <a href="index.html" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center">
-                        <i class="fas fa-home mr-2"></i>
-                        Siteye Git
-                    </a>
-                    <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                        <i class="fas fa-sign-out-alt mr-2"></i>
-                        Çıkış Yap
-                    </button>
-                </div>
-            </div>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-3"></div>
+            <p class="text-gray-600">Yükleniyor...</p>
         </div>
-    </header>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="fixed top-0 left-0 h-screen w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out" id="sidebar">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-indigo-600 mb-8">Admin Paneli</h1>
+            <nav class="space-y-4">
+                <a href="#projects" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 p-3 rounded-lg transition-all">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>Projeler</span>
+                </a>
+                <button id="settingsBtn" class="w-full flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 p-3 rounded-lg transition-all">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </button>
+                <a href="index.html" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 p-3 rounded-lg transition-all">
+                    <i class="fas fa-home"></i>
+                    <span>Siteye Git</span>
+                </a>
+            </nav>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-6">
+            <button id="logoutBtn" class="w-full bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 transition-all flex items-center justify-center space-x-2">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Çıkış Yap</span>
+            </button>
+        </div>
+    </div>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <div class="ml-64 p-8" style="display: none;">
         <!-- Projects Section -->
-        <div class="bg-white rounded-lg shadow p-6 mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-semibold">Projeler</h2>
-                <button id="addProjectBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    <i class="fas fa-plus mr-2"></i>Yeni Proje
+        <div id="projects" class="mb-12">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Projeler</h2>
+                <button id="addProjectBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Yeni Proje</span>
                 </button>
             </div>
-            <div id="projectsList" class="space-y-4">
+            <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Projects will be loaded here -->
             </div>
         </div>
-
-        <!-- Settings Section -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold mb-6">Site Ayarları</h2>
-            <form id="settingsForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Site Başlığı</label>
-                    <input type="text" id="siteTitle" class="w-full p-2 border rounded">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Hakkımda</label>
-                    <textarea id="aboutText" rows="4" class="w-full p-2 border rounded"></textarea>
-                </div>
-                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                    Kaydet
-                </button>
-            </form>
-        </div>
-    </main>
+    </div>
 
     <!-- Project Modal -->
-    <div id="projectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
+    <div id="projectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg w-full max-w-md">
-                <div class="flex justify-between items-center p-4 border-b">
-                    <h3 class="text-lg font-semibold" id="modalTitle">Yeni Proje</h3>
-                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+            <div class="bg-white rounded-xl w-full max-w-md transform transition-all">
+                <div class="flex justify-between items-center p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800" id="modalTitle">Yeni Proje</h3>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 transition-all">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <form id="projectForm" class="p-4 space-y-4">
+                <form id="projectForm" class="p-6 space-y-6">
                     <input type="hidden" id="projectId">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Proje Adı*</label>
-                        <input type="text" id="projectName" required class="w-full p-2 border rounded">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Proje Adı*</label>
+                        <input type="text" id="projectName" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Açıklama*</label>
-                        <textarea id="projectDescription" required rows="3" class="w-full p-2 border rounded"></textarea>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Açıklama*</label>
+                        <textarea id="projectDescription" required rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"></textarea>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Teknolojiler</label>
-                        <input type="text" id="projectTechnologies" placeholder="örn: HTML, CSS, JavaScript" class="w-full p-2 border rounded">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Teknolojiler</label>
+                        <input type="text" id="projectTechnologies" placeholder="örn: HTML, CSS, JavaScript" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Proje Linki</label>
-                        <input type="url" id="projectLink" class="w-full p-2 border rounded">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Proje Linki</label>
+                        <input type="url" id="projectLink" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Görsel URL</label>
-                        <input type="url" id="projectImage" class="w-full p-2 border rounded">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Görsel URL</label>
+                        <input type="url" id="projectImage" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                     </div>
-                    <div class="flex justify-end space-x-2 pt-4">
-                        <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded">
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeModal()" class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all">
                             İptal
                         </button>
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all">
                             Kaydet
                         </button>
                     </div>
@@ -135,26 +150,79 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const addProjectBtn = document.getElementById('addProjectBtn');
 
-        // Sayfa yüklendiğinde
-        document.addEventListener('DOMContentLoaded', () => {
-            // Kullanıcı kontrolü
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    window.location.href = 'admin-login.html';
-                } else {
-                    currentUser = user;
-                    loadProjects();
-                    loadSettings();
-                }
-            });
+        // Sayfa içeriğini göster/gizle
+        function togglePageContent(show) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const content = document.querySelector('.ml-64');
+            
+            if (show) {
+                loadingOverlay.style.display = 'none';
+                content.style.display = 'block';
+            } else {
+                loadingOverlay.style.display = 'flex';
+                content.style.display = 'none';
+            }
+        }
 
-            // Event listeners
-            logoutBtn.addEventListener('click', handleLogout);
-            addProjectBtn.addEventListener('click', () => openModal());
-            projectForm.addEventListener('submit', handleProjectSubmit);
-            window.closeModal = closeModal;
-            window.deleteProject = deleteProject;
-            window.editProject = editProject;
+        // Oturum durumunu kontrol et
+        async function checkAuth() {
+            return new Promise((resolve) => {
+                const unsubscribe = onAuthStateChanged(auth, (user) => {
+                    unsubscribe(); // Dinleyiciyi kaldır
+                    if (user) {
+                        localStorage.setItem('isAuthenticated', 'true');
+                        currentUser = user;
+                        resolve(true);
+                    } else {
+                        localStorage.removeItem('isAuthenticated');
+                        resolve(false);
+                    }
+                });
+            });
+        }
+
+        // Sayfa yüklendiğinde
+        async function initializePage() {
+            togglePageContent(false);
+            
+            // Önce localStorage'dan kontrol et
+            if (!localStorage.getItem('isAuthenticated')) {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            // Firebase oturumunu kontrol et
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            // Sayfa içeriğini yükle
+            await loadProjects();
+            togglePageContent(true);
+        }
+
+        // Sayfayı başlat
+        initializePage();
+
+        // Event listeners
+        logoutBtn.addEventListener('click', handleLogout);
+        addProjectBtn.addEventListener('click', () => openModal());
+        projectForm.addEventListener('submit', handleProjectSubmit);
+        window.closeModal = closeModal;
+        window.deleteProject = deleteProject;
+        window.editProject = editProject;
+
+        // Ayarlar butonuna tıklandığında
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            // Oturum durumunu kontrol et
+            const user = auth.currentUser;
+            if (user) {
+                window.location.href = 'admin-settings.html';
+            } else {
+                window.location.href = 'admin-login.html';
+            }
         });
 
         // Modal işlemleri
@@ -204,12 +272,12 @@
                     await addDoc(collection(db, "projects"), projectData);
                 }
 
-                showAlert('Proje başarıyla kaydedildi', 'success');
+                showToast('Proje başarıyla kaydedildi', 'success');
                 closeModal();
                 loadProjects();
             } catch (error) {
                 console.error('Proje kaydedilirken hata:', error);
-                showAlert('Proje kaydedilemedi', 'error');
+                showToast('Proje kaydedilemedi', 'error');
             } finally {
                 submitBtn.disabled = false;
             }
@@ -217,51 +285,70 @@
 
         async function loadProjects() {
             const projectsList = document.getElementById('projectsList');
-            projectsList.innerHTML = '<div class="text-center py-4">Yükleniyor...</div>';
+            projectsList.innerHTML = `
+                <div class="col-span-full flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                    <span class="ml-3 text-gray-600">Yükleniyor...</span>
+                </div>
+            `;
 
             try {
-                const querySnapshot = await getDocs(collection(db, "projects"));
-                const projects = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-
-                if (projects.length === 0) {
-                    projectsList.innerHTML = '<div class="text-center py-4 text-gray-500">Henüz proje eklenmemiş</div>';
+                const querySnapshot = await getDocs(collection(db, 'projects'));
+                if (querySnapshot.empty) {
+                    projectsList.innerHTML = `
+                        <div class="col-span-full text-center py-8">
+                            <div class="text-gray-500">Henüz proje eklenmemiş</div>
+                        </div>
+                    `;
                     return;
                 }
 
                 projectsList.innerHTML = '';
-                projects.forEach(project => {
-                    projectsList.innerHTML += `
-                        <div class="border rounded p-4 hover:shadow-md transition-shadow">
-                            <div class="flex justify-between">
-                                <div>
-                                    <h3 class="font-semibold">${project.name}</h3>
-                                    <p class="text-gray-600 text-sm mt-1">${project.description}</p>
-                                    ${project.technologies ? `
-                                        <div class="flex gap-2 mt-2">
-                                            ${project.technologies.split(',').map(tech => 
-                                                `<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">${tech.trim()}</span>`
-                                            ).join('')}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <div class="flex space-x-2">
-                                    <button onclick="editProject('${project.id}')" class="text-blue-500 hover:text-blue-700">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button onclick="deleteProject('${project.id}')" class="text-red-500 hover:text-red-700">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                querySnapshot.forEach((doc) => {
+                    const project = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-xl shadow-sm p-6 hover-scale transition-all';
+                    card.innerHTML = `
+                        <div class="relative">
+                            <img src="${project.image || 'https://via.placeholder.com/300x200'}" 
+                                 alt="${project.name}" 
+                                 class="w-full h-48 object-cover rounded-lg mb-4">
+                            <div class="absolute top-2 right-2 flex space-x-2">
+                                <button onclick="editProject('${doc.id}')" 
+                                        class="bg-white text-indigo-600 p-2 rounded-lg shadow hover:bg-indigo-50 transition-all">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteProject('${doc.id}')" 
+                                        class="bg-white text-red-600 p-2 rounded-lg shadow hover:bg-red-50 transition-all">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">${project.name}</h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">${project.description}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            ${project.technologies?.split(',').map(tech => 
+                                `<span class="bg-indigo-50 text-indigo-600 text-xs px-3 py-1 rounded-full">${tech.trim()}</span>`
+                            ).join('') || ''}
+                        </div>
+                        ${project.link ? `
+                            <a href="${project.link}" 
+                               target="_blank" 
+                               class="text-indigo-600 text-sm hover:text-indigo-700 flex items-center">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                Projeyi Görüntüle
+                            </a>
+                        ` : ''}
                     `;
+                    projectsList.appendChild(card);
                 });
             } catch (error) {
-                console.error('Projeler yüklenirken hata:', error);
-                projectsList.innerHTML = '<div class="text-center py-4 text-red-500">Projeler yüklenemedi</div>';
+                console.error("Error loading projects:", error);
+                projectsList.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <div class="text-red-500">Projeler yüklenirken bir hata oluştu</div>
+                    </div>
+                `;
             }
         }
 
@@ -275,7 +362,7 @@
                 }
             } catch (error) {
                 console.error('Proje yüklenirken hata:', error);
-                showAlert('Proje yüklenemedi', 'error');
+                showToast('Proje yüklenemedi', 'error');
             }
         }
 
@@ -284,74 +371,42 @@
 
             try {
                 await deleteDoc(doc(db, "projects", id));
-                showAlert('Proje başarıyla silindi', 'success');
+                showToast('Proje başarıyla silindi', 'success');
                 loadProjects();
             } catch (error) {
                 console.error('Proje silinirken hata:', error);
-                showAlert('Proje silinemedi', 'error');
+                showToast('Proje silinemedi', 'error');
             }
         }
 
-        // Ayarlar işlemleri
-        async function loadSettings() {
-            try {
-                const settingsRef = doc(db, "settings", "general");
-                const settingsSnap = await getDoc(settingsRef);
-                const settings = settingsSnap.exists() ? settingsSnap.data() : {};
-                
-                document.getElementById('siteTitle').value = settings.siteTitle || '';
-                document.getElementById('aboutText').value = settings.aboutText || '';
-            } catch (error) {
-                console.error('Ayarlar yüklenirken hata:', error);
-                showAlert('Ayarlar yüklenemedi', 'error');
-            }
+        // Toast mesajı gösterme fonksiyonu
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-y-0 opacity-100 flex items-center`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                ${message}
+            `;
+            document.body.appendChild(toast);
+
+            // 3 saniye sonra toast'ı kaldır
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
-
-        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-
-            try {
-                const settingsData = {
-                    siteTitle: document.getElementById('siteTitle').value.trim(),
-                    aboutText: document.getElementById('aboutText').value.trim(),
-                    updatedAt: new Date().toISOString(),
-                    updatedBy: currentUser.email
-                };
-
-                await setDoc(doc(db, "settings", "general"), settingsData);
-                showAlert('Ayarlar kaydedildi', 'success');
-            } catch (error) {
-                console.error('Ayarlar kaydedilirken hata:', error);
-                showAlert('Ayarlar kaydedilemedi', 'error');
-            } finally {
-                submitBtn.disabled = false;
-            }
-        });
 
         // Çıkış işlemi
         async function handleLogout() {
             try {
                 await signOut(auth);
+                localStorage.removeItem('isAuthenticated');
                 window.location.href = 'admin-login.html';
             } catch (error) {
                 console.error('Çıkış yapılırken hata:', error);
-                showAlert('Çıkış yapılamadı', 'error');
+                showToast('Çıkış yapılamadı', 'error');
             }
-        }
-
-        // Bildirim gösterme
-        function showAlert(message, type = 'info') {
-            const alert = document.createElement('div');
-            alert.className = `fixed bottom-4 right-4 px-6 py-3 rounded shadow-lg ${
-                type === 'success' ? 'bg-green-500' :
-                type === 'error' ? 'bg-red-500' :
-                'bg-blue-500'
-            } text-white`;
-            alert.textContent = message;
-            document.body.appendChild(alert);
-            setTimeout(() => alert.remove(), 3000);
         }
     </script>
     

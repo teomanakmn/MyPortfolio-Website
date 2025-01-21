@@ -5,50 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Girişi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-md w-96">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-3"></div>
+            <p class="text-gray-600">Giriş yapılıyor...</p>
+        </div>
+    </div>
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
             <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Admin Girişi</h2>
-            <form id="loginForm" class="space-y-4">
+            <form id="loginForm" class="space-y-6">
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">E-posta</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
                     <input type="email" id="email" name="email" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                        placeholder="ornek@email.com">
                 </div>
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Şifre</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
                     <input type="password" id="password" name="password" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                        placeholder="••••••••">
                 </div>
                 <div>
-                    <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Giriş Yap
+                    <button type="submit" id="submitButton"
+                        class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+                        <span>Giriş Yap</span>
                     </button>
                 </div>
             </form>
             <div id="error" class="mt-4 text-red-600 text-sm text-center hidden"></div>
         </div>
     </div>
-    <script type="module">
-        import { auth, signInWithEmailAndPassword } from './js/firebase-config.js';
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Firebase yapılandırması
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYakmE6XSRc_Kq1MCjw3svugRZT55h2DU",
+            authDomain: "site-8969e.firebaseapp.com",
+            projectId: "site-8969e",
+            storageBucket: "site-8969e.firebasestorage.app",
+            messagingSenderId: "49684651933",
+            appId: "1:49684651933:web:f76b4d86f9f81eaef49974",
+            measurementId: "G-XX0E1XGTBV"
+        };
+
+        // Firebase'i başlat
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Loading overlay kontrolü
+        function toggleLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            const submitButton = document.getElementById('submitButton');
+            
+            if (show) {
+                overlay.style.display = 'flex';
+                submitButton.disabled = true;
+                submitButton.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Giriş Yapılıyor...</span>
+                    </div>
+                `;
+            } else {
+                overlay.style.display = 'none';
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<span>Giriş Yap</span>';
+            }
+        }
+
+        // Sayfa yüklendiğinde oturum kontrolü
+        console.log('Firebase Auth durumu:', auth);
+        onAuthStateChanged(auth, (user) => {
+            console.log('Auth durumu değişti:', user ? user.email : 'Oturum yok');
+            if (user) {
+                console.log('Oturum açık, yönlendiriliyor...');
+                localStorage.setItem('isAuthenticated', 'true');
+                window.location.href = 'admin-panel.html';
+            }
+        });
+
+        // Login form işleme
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            toggleLoading(true);
+            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('error');
+            errorDiv.classList.add('hidden');
 
             try {
+                console.log('Giriş denemesi:', email); // Debug için email'i logla
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('Giriş başarılı:', userCredential.user.email); // Başarılı girişi logla
+                localStorage.setItem('isAuthenticated', 'true');
                 window.location.href = 'admin-panel.html';
             } catch (error) {
-                errorDiv.textContent = 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.';
+                console.error('Login error:', error.code, error.message);
+                let errorMessage = 'Giriş başarısız. ';
+                
+                // Firebase hata kodlarına göre özel mesajlar
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage += 'Geçersiz e-posta adresi.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage += 'Bu hesap devre dışı bırakılmış.';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage += 'Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage += 'Yanlış şifre.';
+                        break;
+                    case 'auth/invalid-credential':
+                        errorMessage += 'E-posta veya şifre hatalı.';
+                        break;
+                    default:
+                        errorMessage += 'Bir hata oluştu: ' + error.message;
+                }
+
+                errorDiv.textContent = errorMessage;
                 errorDiv.classList.remove('hidden');
+                toggleLoading(false);
             }
         });
-        
     </script>
 </body>
 </html>

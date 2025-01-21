@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Ayarları - Admin Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .transition-all { transition: all 0.3s ease; }
+        #loadingOverlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: white;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-3"></div>
+            <p class="text-gray-600">Yükleniyor...</p>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="fixed top-0 left-0 h-screen w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out" id="sidebar">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-indigo-600 mb-8">Admin Paneli</h1>
+            <nav class="space-y-4">
+                <a href="admin-panel.html" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 p-3 rounded-lg transition-all">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>Projeler</span>
+                </a>
+                <a href="admin-settings.html" class="flex items-center space-x-3 text-indigo-600 bg-indigo-50 p-3 rounded-lg transition-all">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </a>
+                <a href="index.html" class="flex items-center space-x-3 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 p-3 rounded-lg transition-all">
+                    <i class="fas fa-home"></i>
+                    <span>Siteye Git</span>
+                </a>
+            </nav>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-6">
+            <button id="logoutBtn" class="w-full bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 transition-all flex items-center justify-center space-x-2">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Çıkış Yap</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 p-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Settings Header -->
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Site Ayarları</h2>
+                <p class="text-gray-600 mt-2">Sitenizin genel ayarlarını buradan yönetebilirsiniz.</p>
+            </div>
+
+            <!-- Settings Form -->
+            <div class="bg-white rounded-xl shadow-sm">
+                <form id="settingsForm" class="divide-y divide-gray-200">
+                    <!-- Genel Ayarlar -->
+                    <div class="p-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-cog mr-3 text-indigo-600"></i>
+                            Genel Ayarlar
+                        </h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Site Başlığı</label>
+                                <input type="text" id="siteTitle" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                       placeholder="Örn: Teoman Akman - Portfolio">
+                                <p class="mt-1 text-sm text-gray-500">Bu başlık tarayıcı sekmesinde ve SEO için kullanılacaktır.</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Hakkımda</label>
+                                <textarea id="aboutText" rows="6" 
+                                          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                          placeholder="Kendinizi tanıtan bir metin yazın..."></textarea>
+                                <p class="mt-1 text-sm text-gray-500">Ana sayfada görünecek olan tanıtım metniniz.</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">SEO Açıklaması</label>
+                                <textarea id="seoDescription" rows="3" 
+                                          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                          placeholder="Siteniz için kısa bir SEO açıklaması..."></textarea>
+                                <p class="mt-1 text-sm text-gray-500">Google aramalarda görünecek açıklama metni.</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Anahtar Kelimeler</label>
+                                <input type="text" id="keywords" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                       placeholder="web geliştirici, yazılım mühendisi, frontend developer">
+                                <p class="mt-1 text-sm text-gray-500">Virgülle ayırarak anahtar kelimeleri girin.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sosyal Medya Linkleri -->
+                    <div class="p-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-share-alt mr-3 text-indigo-600"></i>
+                            Sosyal Medya
+                        </h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fab fa-github mr-2"></i>GitHub
+                                </label>
+                                <input type="url" id="githubUrl" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                       placeholder="https://github.com/username">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fab fa-linkedin mr-2"></i>LinkedIn
+                                </label>
+                                <input type="url" id="linkedinUrl" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                       placeholder="https://linkedin.com/in/username">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fab fa-twitter mr-2"></i>Twitter
+                                </label>
+                                <input type="url" id="twitterUrl" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                       placeholder="https://twitter.com/username">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fab fa-instagram mr-2"></i>Instagram
+                                </label>
+                                <input type="url" id="instagramUrl" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                       placeholder="https://instagram.com/username">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İletişim Bilgileri -->
+                    <div class="p-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-address-card mr-3 text-indigo-600"></i>
+                            İletişim Bilgileri
+                        </h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-envelope mr-2"></i>E-posta Adresi
+                                </label>
+                                <input type="email" id="emailAddress" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                       placeholder="ornek@email.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>Konum
+                                </label>
+                                <input type="text" id="location" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                       placeholder="İstanbul, Türkiye">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-phone mr-2"></i>Telefon (İsteğe Bağlı)
+                                </label>
+                                <input type="tel" id="phone" 
+                                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                       placeholder="+90 (___) ___ __ __">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Görünüm Ayarları -->
+                    <div class="p-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-paint-brush mr-3 text-indigo-600"></i>
+                            Görünüm Ayarları
+                        </h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Ana Renk</label>
+                                <div class="flex items-center space-x-3">
+                                    <input type="color" id="primaryColor" 
+                                           class="w-12 h-12 rounded-lg border-0 cursor-pointer"
+                                           value="#4F46E5">
+                                    <span class="text-sm text-gray-500">Sitenin ana rengi</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Font Seçimi</label>
+                                <select id="fontFamily" 
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                                    <option value="Inter">Inter</option>
+                                    <option value="Roboto">Roboto</option>
+                                    <option value="Open Sans">Open Sans</option>
+                                    <option value="Poppins">Poppins</option>
+                                </select>
+                                <p class="mt-1 text-sm text-gray-500">Sitenizde kullanılacak yazı tipi.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kaydet Butonu -->
+                    <div class="p-8 bg-gray-50 rounded-b-xl">
+                        <div class="flex justify-between items-center">
+                            <button type="button" id="resetBtn"
+                                    class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-all flex items-center space-x-2">
+                                <i class="fas fa-undo"></i>
+                                <span>Varsayılana Döndür</span>
+                            </button>
+                            <button type="submit" 
+                                    class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition-all flex items-center space-x-2">
+                                <i class="fas fa-save"></i>
+                                <span>Değişiklikleri Kaydet</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase importları
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase yapılandırması
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYakmE6XSRc_Kq1MCjw3svugRZT55h2DU",
+            authDomain: "site-8969e.firebaseapp.com",
+            projectId: "site-8969e",
+            storageBucket: "site-8969e.firebasestorage.app",
+            messagingSenderId: "49684651933",
+            appId: "1:49684651933:web:f76b4d86f9f81eaef49974",
+            measurementId: "G-XX0E1XGTBV"
+        };
+
+        // Firebase başlatma
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        let currentUser = null;
+
+        // Sayfa yüklendiğinde oturum kontrolü
+        async function initializePage() {
+            togglePageContent(false);
+
+            try {
+                // Oturum durumunu kontrol et
+                const user = auth.currentUser;
+                if (!user && !localStorage.getItem('isAuthenticated')) {
+                    window.location.href = 'admin-login.html';
+                    return;
+                }
+
+                // Ayarları yükle
+                await loadSettings();
+                togglePageContent(true);
+            } catch (error) {
+                console.error('Sayfa yüklenirken hata:', error);
+                showToast('Bir hata oluştu!', 'error');
+            }
+        }
+
+        // Sayfayı başlat
+        initializePage();
+
+        // Oturum değişikliklerini dinle
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                localStorage.removeItem('isAuthenticated');
+                window.location.href = 'admin-login.html';
+            } else {
+                currentUser = user;
+                localStorage.setItem('isAuthenticated', 'true');
+            }
+        });
+
+        // Toast mesajı gösterme fonksiyonu
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-y-0 opacity-100 flex items-center z-50`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                ${message}
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Ayarları yükleme fonksiyonu
+        async function loadSettings() {
+            try {
+                const settingsDoc = await getDoc(doc(db, 'settings', 'site-settings'));
+                if (settingsDoc.exists()) {
+                    const settings = settingsDoc.data();
+                    document.getElementById('siteTitle').value = settings.siteTitle || '';
+                    document.getElementById('aboutText').value = settings.aboutText || '';
+                    document.getElementById('githubUrl').value = settings.githubUrl || '';
+                    document.getElementById('linkedinUrl').value = settings.linkedinUrl || '';
+                    document.getElementById('twitterUrl').value = settings.twitterUrl || '';
+                    document.getElementById('instagramUrl').value = settings.instagramUrl || '';
+                    document.getElementById('emailAddress').value = settings.emailAddress || '';
+                    document.getElementById('location').value = settings.location || '';
+                    document.getElementById('phone').value = settings.phone || '';
+                    document.getElementById('primaryColor').value = settings.primaryColor || '';
+                    document.getElementById('fontFamily').value = settings.fontFamily || '';
+                    document.getElementById('seoDescription').value = settings.seoDescription || '';
+                    document.getElementById('keywords').value = settings.keywords || '';
+                }
+            } catch (error) {
+                console.error('Ayarlar yüklenirken hata:', error);
+                showToast('Ayarlar yüklenirken bir hata oluştu', 'error');
+            }
+        }
+
+        // Sayfa içeriğini göster/gizle
+        function togglePageContent(show) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const content = document.querySelector('.ml-64');
+            
+            if (show) {
+                loadingOverlay.style.display = 'none';
+                content.style.display = 'block';
+            } else {
+                loadingOverlay.style.display = 'flex';
+                content.style.display = 'none';
+            }
+        }
+
+        // Ayarlar formunu işle
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Kaydediliyor...</span>
+                </div>
+            `;
+
+            try {
+                const settings = {
+                    siteTitle: document.getElementById('siteTitle').value.trim(),
+                    aboutText: document.getElementById('aboutText').value.trim(),
+                    githubUrl: document.getElementById('githubUrl').value.trim(),
+                    linkedinUrl: document.getElementById('linkedinUrl').value.trim(),
+                    twitterUrl: document.getElementById('twitterUrl').value.trim(),
+                    instagramUrl: document.getElementById('instagramUrl').value.trim(),
+                    emailAddress: document.getElementById('emailAddress').value.trim(),
+                    location: document.getElementById('location').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    primaryColor: document.getElementById('primaryColor').value.trim(),
+                    fontFamily: document.getElementById('fontFamily').value.trim(),
+                    seoDescription: document.getElementById('seoDescription').value.trim(),
+                    keywords: document.getElementById('keywords').value.trim(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                await setDoc(doc(db, 'settings', 'site-settings'), settings);
+                showToast('Ayarlar başarıyla kaydedildi');
+            } catch (error) {
+                console.error('Ayarlar kaydedilirken hata:', error);
+                showToast('Ayarlar kaydedilirken bir hata oluştu', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `
+                    <i class="fas fa-save"></i>
+                    <span>Değişiklikleri Kaydet</span>
+                `;
+            }
+        });
+
+        // Varsayılan ayarlar
+        const defaultSettings = {
+            siteTitle: 'Teoman Akman - Portfolio',
+            aboutText: 'Merhaba! Ben Teoman Akman. Web geliştirme ve yazılım mühendisliği alanlarında çalışıyorum.',
+            seoDescription: 'Teoman Akman - Full Stack Developer ve Yazılım Mühendisi Portfolio Sitesi',
+            keywords: 'web geliştirici, yazılım mühendisi, full stack developer, frontend, backend',
+            githubUrl: 'https://github.com/teomanakmn',
+            linkedinUrl: '',
+            twitterUrl: '',
+            instagramUrl: '',
+            emailAddress: '',
+            location: 'İstanbul, Türkiye',
+            phone: '',
+            primaryColor: '#4F46E5',
+            fontFamily: 'Inter'
+        };
+
+        // Varsayılana döndür butonu
+        document.getElementById('resetBtn').addEventListener('click', async () => {
+            if (confirm('Tüm ayarları varsayılan değerlere sıfırlamak istediğinize emin misiniz?')) {
+                try {
+                    // Form alanlarını varsayılan değerlerle doldur
+                    Object.keys(defaultSettings).forEach(key => {
+                        const element = document.getElementById(key);
+                        if (element) {
+                            element.value = defaultSettings[key];
+                        }
+                    });
+
+                    // Varsayılan ayarları Firebase'e kaydet
+                    await setDoc(doc(db, 'settings', 'site-settings'), {
+                        ...defaultSettings,
+                        updatedAt: new Date().toISOString()
+                    });
+
+                    showToast('Ayarlar varsayılan değerlere sıfırlandı!');
+                } catch (error) {
+                    console.error('Ayarlar sıfırlanırken hata:', error);
+                    showToast('Ayarlar sıfırlanamadı!', 'error');
+                }
+            }
+        });
+
+        // Çıkış işlemi
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                localStorage.removeItem('isAuthenticated');
+                window.location.href = 'admin-login.html';
+            } catch (error) {
+                console.error('Çıkış yapılırken hata:', error);
+                showToast('Çıkış yapılamadı', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
